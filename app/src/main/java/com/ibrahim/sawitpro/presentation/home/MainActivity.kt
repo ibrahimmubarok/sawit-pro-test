@@ -38,8 +38,6 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
                 // TODO : call api OCR if success open new screen
-            } else {
-                showToast("Failed save image file!")
             }
         }
 
