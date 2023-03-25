@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SawitPro</string>
+    <string name="label_open_camera">Open Camera</string>
 </resources>
