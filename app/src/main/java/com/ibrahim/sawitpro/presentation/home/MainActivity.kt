@@ -13,7 +13,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.ibrahim.sawitpro.R
 import com.ibrahim.sawitpro.databinding.ActivityMainBinding
+import com.ibrahim.sawitpro.presentation.detail.DetailActivity
 import com.ibrahim.sawitpro.utils.Utils
 import com.ibrahim.sawitpro.utils.showToast
 import com.ibrahim.sawitpro.utils.subscribe
@@ -51,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     private val cameraResult =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
-                callApiUpload(getCameraUri(false))
+                callApiUpload()
             }
         }
 
@@ -77,11 +79,13 @@ class MainActivity : AppCompatActivity() {
             result.subscribe(
                 doOnSuccess = { response ->
                     showLoading(false)
-                    showToast(response.payload?.first()?.parsedText.orEmpty())
+                    showToast(getString(R.string.label_success))
+                    val textResult = response.payload?.first()?.parsedText.orEmpty()
+                    navigateToDetailScreen(textResult)
                 },
                 doOnError = { error ->
                     showLoading(false)
-                    showToast(error.message.orEmpty())
+                    showToast(error.exception?.message.orEmpty())
                 },
                 doOnLoading = {
                     showLoading(true)
@@ -92,6 +96,14 @@ class MainActivity : AppCompatActivity() {
 
     // endregion
 
+    private fun navigateToDetailScreen(textResult: String) {
+        DetailActivity.start(
+            context = this@MainActivity,
+            textResult = textResult,
+            imageUri = getCameraUri(false).toString()
+        )
+    }
+
     private fun showLoading(isVisible: Boolean) {
         if (isVisible) {
             binding.pbLoading.visibility = View.VISIBLE
@@ -100,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun callApiUpload(uri: Uri) {
+    private fun callApiUpload() {
         val maxSize = MAX_SIZE_IMAGE_PROFILE
         val fileSizeInKb = fileImage.length() / 1024
         if (fileSizeInKb > maxSize) {
