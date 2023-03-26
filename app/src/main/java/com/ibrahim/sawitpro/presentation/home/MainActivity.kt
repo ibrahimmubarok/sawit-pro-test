@@ -7,18 +7,26 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.firebase.ui.database.FirebaseRecyclerOptions
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.ibrahim.sawitpro.R
+import com.ibrahim.sawitpro.data.model.request.FormDataRequest
 import com.ibrahim.sawitpro.databinding.ActivityMainBinding
 import com.ibrahim.sawitpro.presentation.detail.DetailActivity
+import com.ibrahim.sawitpro.presentation.home.adapter.ListResultFirebaseAdapter
 import com.ibrahim.sawitpro.utils.Utils
-import com.ibrahim.sawitpro.utils.showToast
-import com.ibrahim.sawitpro.utils.subscribe
+import com.ibrahim.sawitpro.utils.ext.showLoading
+import com.ibrahim.sawitpro.utils.ext.showToast
+import com.ibrahim.sawitpro.utils.ext.subscribe
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -47,6 +55,9 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: OcrViewModel by inject()
     private lateinit var binding: ActivityMainBinding
+    private lateinit var db: FirebaseDatabase
+    private lateinit var formDataRef: DatabaseReference
+    private lateinit var firebaseAdapter: ListResultFirebaseAdapter
 
     private lateinit var fileImage: File
 
@@ -66,6 +77,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        initFirebase()
+        setupFirebaseList()
+
         binding.fabCamera.setOnClickListener {
             if (allPermissionsGranted()) {
                 openCamera()
@@ -76,21 +90,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
         viewModel.imageResult.observe(this) { result ->
-            result.subscribe(
-                doOnSuccess = { response ->
-                    showLoading(false)
-                    showToast(getString(R.string.label_success))
-                    val textResult = response.payload?.first()?.parsedText.orEmpty()
-                    navigateToDetailScreen(textResult)
-                },
-                doOnError = { error ->
-                    showLoading(false)
-                    showToast(error.exception?.message.orEmpty())
-                },
-                doOnLoading = {
-                    showLoading(true)
-                }
-            )
+            binding.apply {
+                result.subscribe(
+                    doOnSuccess = { response ->
+                        pbLoading.showLoading(false)
+                        showToast(getString(R.string.label_success))
+                        val textResult = response.payload?.first()?.parsedText.orEmpty()
+                        navigateToDetailScreen(textResult)
+                    },
+                    doOnError = { error ->
+                        pbLoading.showLoading(false)
+                        showToast(error.exception?.message.orEmpty())
+                    },
+                    doOnLoading = {
+                        pbLoading.showLoading(true)
+                    }
+                )
+            }
         }
     }
 
@@ -102,14 +118,6 @@ class MainActivity : AppCompatActivity() {
             textResult = textResult,
             imageUri = getCameraUri(false).toString()
         )
-    }
-
-    private fun showLoading(isVisible: Boolean) {
-        if (isVisible) {
-            binding.pbLoading.visibility = View.VISIBLE
-        } else {
-            binding.pbLoading.visibility = View.GONE
-        }
     }
 
     private fun callApiUpload() {
@@ -129,6 +137,28 @@ class MainActivity : AppCompatActivity() {
             MultipartBody.Part.createFormData("file", fileImage.name, responseBody)
         viewModel.postImageToText(body)
     }
+
+    // region firebase
+
+    private fun initFirebase() {
+        db = Firebase.database
+        formDataRef = db.reference.child(DetailActivity.FORM_DATA_CHILD)
+    }
+
+    private fun setupFirebaseList() {
+        LinearLayoutManager(this).apply {
+            stackFromEnd = true
+            binding.rvTextResult.layoutManager = this
+        }
+
+        val options = FirebaseRecyclerOptions.Builder<FormDataRequest>()
+            .setQuery(formDataRef, FormDataRequest::class.java)
+            .build()
+        firebaseAdapter = ListResultFirebaseAdapter(options)
+        binding.rvTextResult.adapter = firebaseAdapter
+    }
+
+    // endregion
 
     // region camera
 
@@ -164,10 +194,15 @@ class MainActivity : AppCompatActivity() {
             if (allPermissionsGranted()) {
                 openCamera()
             } else {
-                showToast("Permissions not granted by the user.")
+                showToast(getString(R.string.label_permission_not_granted))
                 finish()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        firebaseAdapter.startListening()
     }
 
     // endregion

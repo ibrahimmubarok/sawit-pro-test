@@ -4,14 +4,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import kotlin.math.floor
-import kotlin.math.round
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 object Utils {
 
@@ -31,5 +30,11 @@ object Utils {
         fileOutputStream.write(byteArrayOutputStream.toByteArray())
         fileOutputStream.flush()
         fileOutputStream.close()
+    }
+
+    fun getCurrentDate(): String {
+        val time = Calendar.getInstance().time
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        return formatter.format(time)
     }
 }

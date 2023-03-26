@@ -5,7 +5,7 @@ import com.ibrahim.sawitpro.data.wrapper.ViewResource
 import com.ibrahim.sawitpro.domain.base.BaseUseCase
 import com.ibrahim.sawitpro.domain.response.ParsedResult
 import com.ibrahim.sawitpro.domain.response.toParsedResult
-import com.ibrahim.sawitpro.utils.suspendSubscribe
+import com.ibrahim.sawitpro.utils.ext.suspendSubscribe
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

@@ -3,4 +3,8 @@
     <string name="label_open_camera">Open Camera</string>
     <string name="action_save">Save</string>
     <string name="label_success">Success!</string>
+    <string name="error_send_data">Failed Send Data</string>
+    <string name="label_success_send_data">Success Sending Data</string>
+    <string name="dummy_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </string>
+    <string name="label_permission_not_granted">Permissions not granted by the user.</string>
 </resources>

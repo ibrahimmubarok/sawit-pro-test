@@ -1,4 +1,4 @@
-package com.ibrahim.sawitpro.utils
+package com.ibrahim.sawitpro.utils.ext
 
 import com.ibrahim.sawitpro.data.wrapper.DataResource
 import com.ibrahim.sawitpro.data.wrapper.ViewResource

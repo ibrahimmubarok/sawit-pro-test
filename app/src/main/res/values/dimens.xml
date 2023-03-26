@@ -4,4 +4,8 @@
     <dimen name="dimen_260dp">260dp</dimen>
     <dimen name="dimen_32dp">32dp</dimen>
     <dimen name="dimen_160dp">160dp</dimen>
+    <dimen name="dimen_8dp">8dp</dimen>
+    <dimen name="text_size_12sp">12sp</dimen>
+    <dimen name="dimen_4dp">4dp</dimen>
+    <dimen name="dimen_106dp">106dp</dimen>
 </resources>
